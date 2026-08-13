@@ -1,0 +1,390 @@
+<!-- 
+שאלה מיואל גבע עמ' 196 שאלה 16- 5 שלבי חקירת פונקצית פולינום. מתאים לתירגול בכיתה או לשב. כולל שם. אם התלמיד טועה, מקבל רמז. מעבר לסעיף הבא רק כשעונה נכון. מסך סופי – כל המידע, כולל שם, כמה ניסיונות, מועד ניסיון התשובה, ציון סופי.
+-->
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חקירת פונקציה - עמוד 196 שאלה 16</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Rubik:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #f3e8ff; /* Purple tint background */
+        }
+
+        .math-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: ltr;
+            unicode-bidi: isolate;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @media (max-width: 640px) {
+            h1 { font-size: 1.5rem !important; }
+            .text-xl { font-size: 1.1rem !important; }
+            .p-8 { padding: 1.5rem !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center py-4 px-2 sm:py-8 sm:px-4">
+
+    <header class="w-full max-w-2xl text-center mb-6">
+        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border-t-4 border-purple-600">
+            <h1 class="text-2xl sm:text-3xl font-bold text-purple-800 mb-1">חקירת פונקציית פולינום</h1>
+            <div class="bg-purple-50 p-3 rounded-lg inline-block border border-purple-100 shadow-sm mt-2">
+                <span class="font-bold text-purple-900">הפונקציה:</span>
+                <span class="math-text text-lg sm:text-xl mx-2">y = 3x<sup>5</sup> + 10x<sup>3</sup> - 45x</span>
+            </div>
+            <p class="text-md text-gray-700 mt-3 font-bold bg-yellow-100 inline-block px-4 py-1 rounded-full border border-yellow-200">
+                שאלה 16 | עמוד 196
+            </p>
+        </div>
+    </header>
+
+    <div class="w-full max-w-2xl mb-6">
+        <div class="flex justify-between text-xs sm:text-sm text-gray-500 mb-1">
+            <span id="progress-text">טוען...</span>
+            <span id="progress-percent">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+            <div id="progress-bar" class="bg-purple-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <main id="app-container" class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden min-h-[350px] relative">
+        <div id="content" class="p-4 sm:p-8"></div>
+    </main>
+
+    <footer class="mt-8 text-center text-gray-400 text-xs pb-8">
+        <p><i class="fas fa-brain mr-1"></i> למידה עצמית דיגיטלית</p>
+    </footer>
+
+    <script>
+        const state = {
+            currentStep: 0,
+            mistakesInCurrentStep: 0,
+            totalScore: 0,
+            studentName: "",
+            history: [] // יאחסן { title: string, attempts: number }
+        };
+
+        function calculatePoints(mistakes, maxPoints) {
+            if (mistakes === 0) return maxPoints;
+            if (mistakes === 1) return Math.round(maxPoints / 2);
+            if (mistakes === 2) return 2;
+            return 0;
+        }
+
+        const steps = [
+            {
+                id: 'name-step',
+                type: 'input',
+                isScored: false,
+                title: 'היכרות',
+                question: 'נא להקליד את שמכם המלא:',
+                placeholder: 'שם התלמיד/ה',
+                validate: (val) => val.trim().length > 1,
+                successMsg: 'שלום {{name}}, בואו נתחיל בחקירה.',
+                action: (val) => { state.studentName = val.trim(); }
+            },
+            {
+                id: 'q1',
+                type: 'mc',
+                isScored: true,
+                maxPoints: 10,
+                title: 'סעיף א\': תחום הגדרה',
+                question: 'מהו תחום ההגדרה של הפונקציה?',
+                options: [
+                    { id: 1, text: '<span class="math-text">x ≠ 0</span>', isCorrect: false },
+                    { id: 2, text: '<span class="math-text">x > 0</span>', isCorrect: false },
+                    { id: 3, text: 'לכל <span class="math-text">x</span>', isCorrect: true },
+                    { id: 4, text: '<span class="math-text">-5 < x < 5</span>', isCorrect: false }
+                ],
+                hint: 'זוהי פונקציית פולינום. האם יש בה מגבלה של שורש או מכנה?',
+                successMsg: 'נכון מאוד! הפונקציה מוגדרת לכל x.'
+            },
+            {
+                id: 'q2',
+                type: 'mc',
+                isScored: true,
+                maxPoints: 15,
+                title: 'סעיף ב(1) גזירה',
+                question: 'גזרו את הפונקציה. מהי הנגזרת?',
+                options: [
+                    { id: 1, text: '<span class="math-text">y\' = 15x<sup>4</sup> + 30x<sup>2</sup> - 45</span>', isCorrect: true },
+                    { id: 2, text: '<span class="math-text">y\' = 3x<sup>4</sup> + 10x<sup>2</sup> - 45</span>', isCorrect: false },
+                    { id: 3, text: '<span class="math-text">y\' = 15x<sup>4</sup> + 30x<sup>2</sup></span>', isCorrect: false },
+                    { id: 4, text: '<span class="math-text">y\' = 5x<sup>4</sup> + 3x<sup>2</sup> - 45</span>', isCorrect: false }
+                ],
+                hint: 'זכרו: הנגזרת של axⁿ היא n·axⁿ⁻¹.',
+                successMsg: 'מצוין. הנגזרת היא y\' = 15x⁴ + 30x² - 45.'
+            },
+            {
+                id: 'q3',
+                type: 'mc',
+                isScored: true,
+                maxPoints: 15,
+                title: 'סעיף ב(2): מציאת חשד לקיצון',
+                question: 'מצאו את שיעורי ה-x של הנקודות החשודות כקיצון.',
+                options: [
+                    { id: 1, text: '<span class="math-text">x = 3, x = -3</span>', isCorrect: false },
+                    { id: 2, text: '<span class="math-text">x = 1, x = -1</span>', isCorrect: true },
+                    { id: 3, text: '<span class="math-text">x = 0</span>', isCorrect: false },
+                    { id: 4, text: 'אין נקודות חשודות', isCorrect: false }
+                ],
+                hint: 'חלקו את הנגזרת ב-15 והשתמשו בהצבה t = x².',
+                successMsg: 'יפה! הפתרונות הם x = ±1 (הפתרון הדו-ריבועי t = -3 נפסל).'
+            },
+            {
+                id: 'q4',
+                type: 'mc',
+                isScored: true,
+                maxPoints: 15,
+                title: 'סעיף ב(3): סיווג נקודות קיצון',
+                question: 'מצאו את שיעורי ה-y וסווגו את הנקודות.',
+                options: [
+                    { id: 1, text: '<span class="math-text">(1, -32)</span> מקסימום, <span class="math-text">(-1, 32)</span> מינימום', isCorrect: false },
+                    { id: 2, text: '<span class="math-text">(1, 0)</span> מינימום, <span class="math-text">(-1, 0)</span> מקסימום', isCorrect: false },
+                    { id: 3, text: '<span class="math-text">(1, -32)</span> מינימום, <span class="math-text">(-1, 32)</span> מקסימום', isCorrect: true },
+                    { id: 4, text: 'הנקודות אינן נקודות קיצון', isCorrect: false }
+                ],
+                hint: 'הציבו בטבלה או בנגזרת שנייה. אל תשכחו להציב בפונקציה המקורית כדי למצוא את y.',
+                successMsg: 'נכון מאוד. (1,-32) מינימום ו-(-1,32) מקסימום.'
+            },
+            {
+                id: 'q5',
+                type: 'mc',
+                isScored: true,
+                maxPoints: 15,
+                title: 'סעיף ג\': תחומי עלייה וירידה',
+                question: 'מתי הפונקציה עולה?',
+                options: [
+                    { id: 1, text: 'בין 1- ל-1', isCorrect: false },
+                    { id: 2, text: '<span class="math-text">x > 1</span> או <span class="math-text">x < -1</span>', isCorrect: true },
+                    { id: 3, text: '<span class="math-text">x > 0</span>', isCorrect: false },
+                    { id: 4, text: 'הפונקציה עולה לכל <span class="math-text">x</span>', isCorrect: false }
+                ],
+                hint: 'הפונקציה עולה לפני נקודת המקסימום ואחרי נקודת המינימום.',
+                successMsg: 'בדיוק! אלו הם תחומי העלייה.'
+            },
+            {
+                id: 'q6',
+                type: 'input',
+                isScored: true,
+                maxPoints: 10,
+                title: 'סעיף ד\' (1): חיתוך עם ציר ה-y',
+                question: 'מהי נקודת החיתוך עם ציר ה-y?',
+                placeholder: '(x,y)',
+                validate: (val) => {
+                    const clean = val.replace(/\s/g, '').replace(/[()]/g, '');
+                    return clean === '0,0';
+                },
+                hint: 'הציבו x = 0 בפונקציה.',
+                successMsg: 'נכון, הנקודה היא (0,0).'
+            },
+            {
+                id: 'q7',
+                type: 'mc',
+                isScored: true,
+                maxPoints: 20,
+                title: 'סעיף ד\' (2): חיתוך עם ציר ה-x',
+                question: 'מהן נקודות החיתוך עם ציר ה-x?',
+                options: [
+                    { id: 1, text: '<span class="math-text">(0,0)</span> בלבד', isCorrect: false },
+                    { id: 2, text: 'בקירוב <span class="math-text">(1.6, 0), (-1.6, 0)</span>', isCorrect: false },
+                    { id: 3, text: '<span class="math-text">(0,0)</span> וגם בקירוב <span class="math-text">(1.6, 0), (-1.6, 0)</span>', isCorrect: true },
+                    { id: 4, text: '<span class="math-text">(0,0), (3,0), (-3,0)</span>', isCorrect: false }
+                ],
+                hint: 'הוציאו גורם משותף x והשוו את הביטוי בסוגריים לאפס.',
+                successMsg: 'כל הכבוד! מצאת את כל נקודות החיתוך.'
+            },
+            {
+                id: 'end',
+                type: 'summary',
+                title: 'סיכום תרגיל'
+            }
+        ];
+
+        function renderStep() {
+            const stepData = steps[state.currentStep];
+            const container = document.getElementById('content');
+            
+            const currentQuestionSteps = steps.filter(s => s.type !== 'summary' && s.id !== 'name-step').length;
+            const currentIdx = steps.slice(0, state.currentStep).filter(s => s.type !== 'summary' && s.id !== 'name-step').length;
+            const percentage = Math.round((currentIdx / currentQuestionSteps) * 100);
+            
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-percent').innerText = `${percentage}%`;
+            document.getElementById('progress-text').innerText = stepData.type === 'summary' ? 'הושלם' : `סעיף ${currentIdx + 1} מתוך ${currentQuestionSteps}`;
+
+            if (stepData.type === 'summary') {
+                renderSummary(container);
+                return;
+            }
+
+            let html = `<div class="fade-in text-right">
+                <h2 class="text-xl sm:text-2xl font-bold text-purple-800 mb-4 border-b pb-2 border-purple-200">${stepData.title}</h2>
+                <p class="text-lg mb-6">${stepData.question.replace('{{name}}', state.studentName || 'תלמיד/ה')}</p>`;
+
+            if (stepData.type === 'mc') {
+                html += `<div class="grid gap-3">` + 
+                    stepData.options.map(opt => `
+                        <button onclick="checkMC(${opt.id})" id="opt-${opt.id}" class="w-full text-right p-3 sm:p-4 rounded-xl border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition flex justify-between items-center group">
+                            <span>${opt.text}</span>
+                            <i class="far fa-circle text-gray-300 group-hover:text-purple-400"></i>
+                        </button>
+                    `).join('') + `</div>`;
+            } else if (stepData.type === 'input') {
+                html += `<div class="flex flex-col items-center">
+                    <input type="text" id="user-input" class="w-full max-w-xs border-2 border-gray-300 rounded-lg p-3 text-center focus:border-purple-500 mb-4" placeholder="${stepData.placeholder || ''}">
+                    <button onclick="handleInputSubmit()" class="bg-purple-600 text-white px-8 py-2 rounded-full font-bold hover:bg-purple-700 transition w-full max-w-xs shadow">בדיקה</button>
+                </div>`;
+            }
+
+            html += `<div id="feedback" class="mt-4 hidden"></div></div>`;
+            container.innerHTML = html;
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function checkMC(selectedId) {
+            const stepData = steps[state.currentStep];
+            const option = stepData.options.find(o => o.id === selectedId);
+            const btn = document.getElementById(`opt-${selectedId}`);
+
+            if (option.isCorrect) {
+                const points = calculatePoints(state.mistakesInCurrentStep, stepData.maxPoints);
+                state.totalScore += points;
+                state.history.push({ title: stepData.title, attempts: state.mistakesInCurrentStep + 1 });
+                
+                btn.classList.add('border-green-500', 'bg-green-50');
+                btn.querySelector('i').className = 'fas fa-check-circle text-green-500';
+                showFeedback('success', stepData.successMsg);
+            } else {
+                state.mistakesInCurrentStep++;
+                btn.classList.add('border-red-300', 'bg-red-50', 'shake');
+                btn.querySelector('i').className = 'fas fa-times-circle text-red-500';
+                showFeedback('error', stepData.hint);
+            }
+        }
+
+        function handleInputSubmit() {
+            const stepData = steps[state.currentStep];
+            const val = document.getElementById('user-input').value.trim();
+            
+            if (stepData.validate(val)) {
+                if (stepData.action) stepData.action(val);
+                if (stepData.isScored) {
+                    const points = calculatePoints(state.mistakesInCurrentStep, stepData.maxPoints);
+                    state.totalScore += points;
+                    state.history.push({ title: stepData.title, attempts: state.mistakesInCurrentStep + 1 });
+                }
+                showFeedback('success', stepData.successMsg);
+            } else {
+                state.mistakesInCurrentStep++;
+                document.getElementById('user-input').classList.add('shake', 'border-red-500');
+                showFeedback('error', stepData.hint);
+                setTimeout(() => document.getElementById('user-input').classList.remove('shake'), 500);
+            }
+        }
+
+        function showFeedback(type, msg) {
+            const fb = document.getElementById('feedback');
+            const processedMsg = msg.replace('{{name}}', state.studentName || 'תלמיד/ה');
+            
+            fb.className = `mt-4 p-4 rounded-lg border ${type === 'success' ? 'bg-green-100 border-green-200 text-green-800' : 'bg-amber-50 border-amber-200 text-amber-700'}`;
+            fb.innerHTML = `<div class="flex items-center">
+                <i class="fas ${type === 'success' ? 'fa-check-circle text-green-600' : 'fa-lightbulb text-amber-600'} ml-2 text-xl"></i>
+                <span class="font-medium">${processedMsg}</span>
+            </div>` + (type === 'success' ? `<button onclick="nextStep()" class="mt-4 block w-full bg-purple-600 text-white py-2 rounded-lg font-bold shadow hover:bg-purple-700">המשך <i class="fas fa-arrow-left mr-1"></i></button>` : '');
+            fb.classList.remove('hidden');
+        }
+
+        function nextStep() {
+            state.currentStep++;
+            state.mistakesInCurrentStep = 0;
+            renderStep();
+        }
+
+        function renderSummary(container) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('he-IL');
+
+            let summaryText = `סיכום תרגיל - חקירת פונקציית פולינום\n`;
+            summaryText += `שם: ${state.studentName}\n`;
+            summaryText += `תאריך: ${dateStr} | שעה: ${timeStr}\n`;
+            summaryText += `ציון סופי: ${state.totalScore} מתוך 100\n\n`;
+            summaryText += `פירוט סעיפים:\n`;
+            
+            let historyHtml = state.history.map(item => {
+                summaryText += `- ${item.title}: הצלחה בניסיון מספר ${item.attempts}\n`;
+                return `<div class="flex justify-between border-b py-2 text-sm">
+                    <span class="font-medium">${item.title}</span>
+                    <span class="text-purple-600">ניסיון: ${item.attempts}</span>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `<div class="fade-in text-center">
+                <div class="text-5xl mb-4 text-purple-600"><i class="fas fa-award"></i></div>
+                <h2 class="text-2xl font-bold text-purple-800 mb-2">סיכום התרגול</h2>
+                <p class="text-lg text-gray-600 mb-6">${state.studentName}, סיימת את החקירה בהצלחה!</p>
+                
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-right mb-6 shadow-inner">
+                    <p class="mb-1"><strong>שם:</strong> ${state.studentName}</p>
+                    <p class="mb-1"><strong>תאריך:</strong> ${dateStr}</p>
+                    <p class="mb-4"><strong>שעה:</strong> ${timeStr}</p>
+                    <div class="mb-4">${historyHtml}</div>
+                    <div class="text-2xl font-black text-center text-purple-700">ציון סופי: ${state.totalScore}</div>
+                </div>
+
+                <button onclick="copyToClipboard('${btoa(unescape(encodeURIComponent(summaryText)))}')" class="bg-purple-600 text-white px-6 py-3 rounded-full font-bold hover:bg-purple-700 transition flex items-center justify-center mx-auto mb-4 w-full shadow-lg">
+                    <i class="fas fa-copy ml-2"></i> העתקת קוד סיכום למורה
+                </button>
+                <p id="copy-confirm" class="text-green-600 text-sm hidden font-bold">הסיכום הועתק בהצלחה!</p>
+            </div>`;
+        }
+
+        window.copyToClipboard = function(str) {
+            const decoded = decodeURIComponent(escape(atob(str)));
+            navigator.clipboard.writeText(decoded).then(() => {
+                document.getElementById('copy-confirm').classList.remove('hidden');
+            });
+        }
+
+        window.onload = renderStep;
+    </script>
+</body>
+</html>
